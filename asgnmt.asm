@@ -1,5 +1,6 @@
 .MODEL SMALL
 .STACK 1500
+.386
 .DATA
 ;Login & Register =========================
 
@@ -105,6 +106,8 @@ paymentStr5  DB "Do you wish to top up your balance? (y/n) $"
 paymentStr6  DB "Do you want to proceed with the payment? (y/n) $"
 paymentStr7  DB "Payment Success!  $"
 
+
+newLine db 10,13,"$"
 
 .CODE
 MAIN PROC
