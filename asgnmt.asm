@@ -13,7 +13,7 @@ wlcmMsg db 10,13,"Welcome to our Hotel Reservation System"
         db 10,13,"Please enter your choice: $"
 userChoice db ?
 ;User profile=========================== // User Profile Function
-userProfile             db "User Profile"
+userProfileTitle        db "User Profile"
                         db 10,13, "============"
                         db 10,13, "1. View Profile"
                         db 10,13, "2. Edit Profile"
@@ -60,6 +60,8 @@ displayRinggit db "RM$"
 
 mainMenuChoice db ?
 
+choiceError db "Invalid Choice - Please Enter Between 1-4! $"
+
 ;Room Booking===========================
 locations       db " 1. Selangor"
                 db " 2. Kuala Lumpur"
@@ -85,19 +87,24 @@ bookingErrorSelection    db 10,13,"Please enter 1 to 4 only $"
 
 
 ;Payment================================
-paymentSub DB 13,10,"===Payment==="
-           DB 13,10,"1.Check out"
-           DB 13,10,"2.Check Balance"
-           DB 13,10,"3.Payment History"
-           DB 13,10,"4.Back $"
+paymentSub  DB 13,10,"===Payment==="
+            DB 13,10,"1.Check out"
+            DB 13,10,"2.Check Balance"
+            DB 13,10,"3.Payment History"
+            DB 13,10,"4.Back $"
+paymentSub2 DB 13,10,"1.Back to payment selection."
+	    DB 13,10,"2.Back to main menu.$"
 paymentStart DB 13,10,"Enter your choice: $"
 iresponse  DB 13,10,"Please choose between 1-4 !$"
-str1       DB 13,10,"CHECKOUT PAGE$"
-str2       DB 13,10,"CHECK BALANCE PAGE$"
-str3       DB 13,10,"PAYMENT HISTORY PAGE$"
-newLine DB 13, 10, '$'
-;=======================================
-newLine db 10,13,"$"
+paymentStr1  DB 13,10,"CHECKOUT PAGE$"
+paymentStr2  DB 13,10,"CHECK BALANCE PAGE$"
+paymentStr3  DB 13,10,"PAYMENT HISTORY PAGE$"
+paymentStr4  DB 13,10,"CURRENT ACCOUNT BALANCE: $"
+balance      DB "5000.00 $"
+paymentStr5  DB "Do you wish to top up your balance? (y/n) $"
+paymentStr6  DB "Do you want to proceed with the payment? (y/n) $"
+paymentStr7  DB "Payment Success!  $"
+
 
 .CODE
 MAIN PROC
@@ -158,9 +165,12 @@ JE EXIT
 ;-------------------------------------------------------------------USERPROFILE START----------------------------------------------------------------------
 
 USERPROFILE:; User Profile Function
+mov ah,00
+mov al,02
+int 10h
 mov al, 0
 MOV AH, 09H
-LEA DX,userProfile; 1. View Profile, 2. Edit Profile, 3. Top Up Balance
+LEA DX,userProfileTitle ; 1. View Profile, 2. Edit Profile, 3. Top Up Balance
 INT 21H
 mov ah,01H; Input Main Menu Choice
 int 21h
@@ -182,9 +192,18 @@ EDITPROFILE:
 TOPUPBALANCE:
 
 USERPROFILE_MENUCHOICE_ERROR:
-mov ah, 09H;
-lea dx, "Invalid Choice - Please Enter Between 1-4! $"
+mov ah, 02H;
+mov dl, nextLine;
 int 21h;
+mov ah, 02H;
+mov dl, nextLine;
+int 21h;
+mov ah, 09H;
+lea dx, choiceError
+int 21h;
+mov ah,01h
+int 21h;
+JMP USERPROFILE
 
 
 
@@ -261,32 +280,56 @@ CMP AL, "2"
 JE CHKBLC
 CMP AL, "3"
 JE PAYHISTORY
-CMP AL, "4"
-JE MAINMENU
 
 MOV AH, 09H
 LEA DX, iresponse
 INT 21H
 JMP PROMPT
 
+
+
+
 CHKOUT:
 MOV AH, 09H
-LEA DX, str1
+LEA DX, paymentStr1
 INT 21H
 JMP EXIT
 
+
 CHKBLC:
 MOV AH, 09H
-LEA DX, str2
+LEA DX, paymentStr2
 INT 21H
+
+;----OUTPUT CURRENT ACCOUNT BALANCE
+MOV AH, 09
+LEA DX, paymentStr4
+INT 21H
+MOV AH, 09H
+LEA DX, balance
+INT 21H
+
+
+MOV AH, 09H
+LEA DX, newLine
+INT 21H
+
+
+;----PROMPT USER TO CONTINUE
+
+
+
+
+
 JMP EXIT
+
+
 
 PAYHISTORY:
 MOV AH, 09H
 LEA DX, str3
 INT 21H
 JMP EXIT
-
 ;-------------------------------------------------------------------PAYMENT END------------------------------------------------------------------------
 
 
